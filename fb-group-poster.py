@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import asyncio
 from apify import Actor  # Updated import
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -8,7 +9,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 
 async def main():
-    input_data = await Actor.get_input()  # You might need to update get_input too, if applicable
+    input_data = await Actor.get_input()  # Get the actor input
 
     # Get group URLs and split them into a list
     urls_str = input_data.get("Facebook_Profile_URL", "")
@@ -45,13 +46,12 @@ async def main():
         driver.get('https://www.facebook.com')
         time.sleep(2)
         
-        # Use credentials if provided
+        # Use credentials if provided; otherwise, try cookies
         if username and password:
             driver.find_element(By.ID, "email").send_keys(username)
             driver.find_element(By.ID, "pass").send_keys(password)
             driver.find_element(By.NAME, "login").click()
             time.sleep(5)
-        # Otherwise, if cookies provided, add them
         elif cookies:
             for cookie in cookies:
                 driver.add_cookie(cookie)
@@ -83,5 +83,5 @@ async def main():
     finally:
         driver.quit()
 
-# Run the actor using the Actor class
-Actor.main(main)
+if __name__ == '__main__':
+    asyncio.run(main())
