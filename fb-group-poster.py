@@ -7,12 +7,13 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.service import Service
 
 async def main():
     # Initialize the Actor environment
     await Actor.init()
     
-    # Now it's safe to get the actor input
+    # Get the actor input
     input_data = await Actor.get_input()
     
     # Get group URLs and split them into a list
@@ -45,10 +46,12 @@ async def main():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-gpu")
     options.add_argument("--disable-dev-shm-usage")
-    # Set the binary location for Chromium (make sure it's installed in your Docker image)
+    # Set the Chromium binary location
     options.binary_location = "/usr/bin/chromium"
     
-    driver = webdriver.Chrome(options=options)
+    # Specify the ChromeDriver path explicitly
+    service = Service(executable_path="/usr/bin/chromedriver")
+    driver = webdriver.Chrome(service=service, options=options)
     
     try:
         driver.get('https://www.facebook.com')
