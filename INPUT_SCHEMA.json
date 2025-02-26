@@ -1,0 +1,20 @@
+{
+    "title": "Facebook Group Auto Poster",
+    "type": "object",
+    "schemaVersion": 1,
+    "properties": {
+      "groups_links_list": {
+        "title": "Facebook Groups",
+        "type": "array",
+        "items": { "type": "string" },
+        "description": "List of Facebook group URLs."
+      },
+      "message": {
+        "title": "Post Message",
+        "type": "string",
+        "description": "The text content of the post."
+      }
+    },
+    "required": ["groups_links_list", "message"]
+  }
+  
