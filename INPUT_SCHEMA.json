@@ -8,14 +8,14 @@
       "type": "string",
       "description": "List of Facebook group URLs separated by commas.",
       "editor": "textarea",
-      "prefill": "https://www.facebook.com/groups/825095794282007/\nhttps://www.facebook.com/groups/1478593245698376/"
+      "default": "https://www.facebook.com/groups/825095794282007/\nhttps://www.facebook.com/groups/1478593245698376/"
     },
     "Message": {
       "title": "Enter Your Message",
       "type": "string",
       "description": "The text content of the post.",
       "editor": "textarea",
-      "prefill": "Your message here"
+      "default": "Your message here"
     },
     "Delay": {
       "title": "Delay (Seconds)",
@@ -28,14 +28,14 @@
       "type": "string",
       "description": "Paste your Facebook session cookies here as a JSON array.",
       "editor": "textarea",
-      "prefill": ""
+      "default": ""
     },
     "Username": {
       "title": "Facebook Username (Optional)",
       "type": "string",
       "description": "Your Facebook account username or email. Used if cookies are not provided.",
       "editor": "textfield",
-      "prefill": ""
+      "default": ""
     },
     "Password": {
       "title": "Facebook Password (Optional)",
