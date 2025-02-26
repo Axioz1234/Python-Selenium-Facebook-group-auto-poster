@@ -11,7 +11,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 
-# For explicit waits:
+# Import for explicit waits
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 
@@ -21,6 +21,8 @@ async def main():
     
     # Get the actor input
     input_data = await Actor.get_input()
+    # Expecting a JSON input with keys:
+    # "Facebook_Profile_URL", "Message", "Delay", "Cookies", "Username", "Password"
     urls_str = input_data.get("Facebook_Profile_URL", "")
     groups_links_list = [url.strip() for url in urls_str.split(",") if url.strip()]
     message = input_data.get("Message", "")
@@ -50,10 +52,10 @@ async def main():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-gpu")
     options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--window-size=1920,1080")  # Set a large viewport
-    options.binary_location = "/usr/bin/chromium"   # Ensure Chromium is installed in your Docker image
-    service = Service(executable_path="/usr/bin/chromedriver")  # Ensure ChromeDriver is installed
-    
+    options.add_argument("--window-size=1920,1080")
+    options.binary_location = "/usr/bin/chromium"  # Path to Chromium in Docker
+    service = Service(executable_path="/usr/bin/chromedriver")  # Path to ChromeDriver
+
     try:
         driver = webdriver.Chrome(service=service, options=options)
     except Exception as e:
@@ -65,7 +67,7 @@ async def main():
         driver.get("https://www.facebook.com")
         time.sleep(2)
         
-        # Log in via credentials or cookies
+        # Log in via credentials if provided; otherwise, add cookies.
         if username and password:
             driver.find_element(By.ID, "email").send_keys(username)
             driver.find_element(By.ID, "pass").send_keys(password)
@@ -74,6 +76,7 @@ async def main():
         elif cookies:
             for cookie in cookies:
                 if "sameSite" in cookie:
+                    # Accept both correct and lower-case variants
                     if cookie["sameSite"] == "lax":
                         cookie["sameSite"] = "Lax"
                     elif cookie["sameSite"] == "no_restriction":
@@ -89,52 +92,28 @@ async def main():
             return
 
         wait = WebDriverWait(driver, 20)
-
+        
         for group_url in groups_links_list:
             driver.get(group_url)
             time.sleep(3)
             
-            # Directly click "Write something..."
+            # Step 1: Click "Write something..." button
+            # Using your provided absolute XPath:
+            write_xpath = "//*[@id='mount_0_0_gi']/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div/div[2]/div/div/div[4]/div/div/div[2]/div/div/div[2]/div[1]/div/div/div/div[1]/div"
             try:
-                # Locate the clickable parent of the span containing "Write something..."
-                write_something = wait.until(
-                    EC.element_to_be_clickable(
-                        (By.XPATH, "//span[text()='Write something...']/ancestor::div[@role='button']")
-                    )
-                )
+                write_something = wait.until(EC.element_to_be_clickable((By.XPATH, write_xpath)))
                 driver.execute_script("arguments[0].scrollIntoView(true);", write_something)
+                time.sleep(1)
                 write_something.click()
+                print(f"✅ Clicked 'Write something...' on {group_url}")
                 time.sleep(2)
             except Exception as e:
                 print(f"⚠️ Could not click 'Write something...' on {group_url}: {e}")
                 traceback.print_exc()
                 continue
-
-            # Type message in the popup field
-            try:
-                popup_field = wait.until(
-                    EC.presence_of_element_located((By.XPATH, "//div[@aria-label='Create a public post…']"))
-                )
-                popup_field.click()
-                popup_field.send_keys(message)
-                time.sleep(1)
-            except Exception as e:
-                print(f"⚠️ Could not type into the popup field on {group_url}: {e}")
-                traceback.print_exc()
-                continue
-
-            # Click the Post button
-            try:
-                post_button = wait.until(
-                    EC.element_to_be_clickable((By.XPATH, "//div[@aria-label='Post']"))
-                )
-                post_button.click()
-                time.sleep(delay)
-                print(f"✅ Successfully posted to {group_url}")
-            except Exception as e:
-                print(f"⚠️ Failed to post in {group_url}: {e}")
-                traceback.print_exc()
-
+            
+            # (For now, we stop here; later steps: type text, click Post, etc.)
+            
     except Exception as e:
         print(f"❌ Error during processing: {e}")
         traceback.print_exc()
