@@ -30,4 +30,17 @@
           "expirationDate": { "type": "number" },
           "hostOnly": { "type": "boolean" },
           "httpOnly": { "type": "boolean" },
-          "name": { "
+          "name": { "type": "string" },
+          "path": { "type": "string" },
+          "sameSite": { "type": "string" },
+          "secure": { "type": "boolean" },
+          "session": { "type": "boolean" },
+          "storeId": { "type": ["string", "null"] },
+          "value": { "type": "string" }
+        }
+      },
+      "description": "Paste your Facebook session cookies here (if needed)."
+    }
+  },
+  "required": ["Facebook_Profile_URL", "Message"]
+}
