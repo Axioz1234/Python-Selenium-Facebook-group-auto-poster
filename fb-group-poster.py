@@ -50,10 +50,10 @@ async def main():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-gpu")
     options.add_argument("--disable-dev-shm-usage")
-    options.add_argument("--window-size=1920,1080")  # Set a larger viewport
-    options.binary_location = "/usr/bin/chromium"  # Path to Chromium in Docker
+    options.add_argument("--window-size=1920,1080")  # Large viewport
+    options.binary_location = "/usr/bin/chromium"   # Path to Chromium in Docker
     service = Service(executable_path="/usr/bin/chromedriver")  # Path to ChromeDriver
-    
+
     try:
         driver = webdriver.Chrome(service=service, options=options)
     except Exception as e:
@@ -65,19 +65,25 @@ async def main():
         driver.get("https://www.facebook.com")
         time.sleep(2)
         
-        # Use credentials if provided; otherwise, use cookies
+        # Log in via credentials if provided, otherwise via cookies.
         if username and password:
             driver.find_element(By.ID, "email").send_keys(username)
             driver.find_element(By.ID, "pass").send_keys(password)
             driver.find_element(By.NAME, "login").click()
             time.sleep(5)
         elif cookies:
-            # Accept additional sameSite values: "lax" and "no_restriction"
-            valid_sameSite = ["Strict", "Lax", "None", "lax", "no_restriction"]
+            # Convert certain sameSite values to valid ones.
             for cookie in cookies:
-                if "sameSite" in cookie and cookie["sameSite"] not in valid_sameSite:
-                    print(f"Cookie '{cookie.get('name')}' has invalid sameSite value '{cookie['sameSite']}', removing it.")
-                    del cookie["sameSite"]
+                if "sameSite" in cookie:
+                    # Map lower-case "lax" to "Lax" and "no_restriction" to "None"
+                    if cookie["sameSite"] == "lax":
+                        cookie["sameSite"] = "Lax"
+                    elif cookie["sameSite"] == "no_restriction":
+                        cookie["sameSite"] = "None"
+                    # Otherwise, if not valid, remove the sameSite attribute.
+                    elif cookie["sameSite"] not in ["Strict", "Lax", "None"]:
+                        print(f"Cookie '{cookie.get('name')}' has invalid sameSite value '{cookie['sameSite']}', removing it.")
+                        del cookie["sameSite"]
                 driver.add_cookie(cookie)
             driver.refresh()
             time.sleep(3)
@@ -91,7 +97,7 @@ async def main():
             driver.get(group_url)
             time.sleep(3)
             
-            # Click "Write something..." directly, skipping the Discussion tab
+            # Click "Write something..." directly
             try:
                 write_something = wait.until(
                     EC.element_to_be_clickable(
@@ -105,7 +111,7 @@ async def main():
                 traceback.print_exc()
                 continue
 
-            # Type text into the popup field
+            # Type text in the popup field
             try:
                 popup_field = wait.until(
                     EC.presence_of_element_located((By.XPATH, "//div[@aria-label='Create a public post…']"))
