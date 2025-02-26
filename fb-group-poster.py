@@ -1,65 +1,76 @@
+import os
+import time
+import Apify
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
-import time
-from time import sleep
 
-def main():
-    # Set up Facebook login account name and password
-    account = "sample@gmail.com"
-    password = "sample"
+async def main():
+    # Get input from Apify
+    input_data = await Apify.get_input()
 
-    # Set up Facebook groups to post, you must be a member of the group
-    groups_links_list = [
-        "https://www.facebook.com/groups/sample1", "https://www.facebook.com/groups/sample2"
-    ]
+    # Load Facebook credentials from environment variables
+    account = os.getenv("FB_ACCOUNT")
+    password = os.getenv("FB_PASSWORD")
 
-    # Set up text content to post
-    message = "Checkout an amazing selenium script for posting automaticaaly on Facebook groups! https://github.com/ethanXWL/Python-Selenium-Facebook-group-poster"
+    # Get group links and message from Apify input
+    groups_links_list = input_data.get("groups_links_list", [])
+    message = input_data.get("message", "")
 
-    # Set up paths of images to post
-    images_list = ['C:/Users/OEM/Pictures/sample1.jpg','C:/Users/OEM/Pictures/sample2.jpg']
+    if not account or not password:
+        print("❌ Error: Missing Facebook credentials in environment variables!")
+        return
 
-    # Login Facebook
+    if not groups_links_list or not message:
+        print("❌ Error: Missing required input fields (groups or message).")
+        return
+
+    # Configure Selenium Chrome Driver
     chrome_options = webdriver.ChromeOptions()
-    prefs = {"profile.default_content_setting_values.notifications" : 2}
-    chrome_options.add_experimental_option("prefs",prefs)
-    driver = webdriver.Chrome(chrome_options=chrome_options)
-    driver.get('https://www.facebook.com')
-    emailelement = driver.find_element(By.XPATH,'//*[@id="email"]')
-    emailelement.send_keys(account)
-    passelement = driver.find_element(By.XPATH,'//*[@id="pass"]')
-    passelement.send_keys(password)
-    loginelement = driver.find_element(By.XPATH,'//*[@id="loginbutton"]')
-    loginelement.click()
+    chrome_options.add_argument("--headless")  # Run in headless mode for Apify
+    chrome_options.add_argument("--no-sandbox")
+    chrome_options.add_argument("--disable-gpu")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_experimental_option("prefs", {"profile.default_content_setting_values.notifications": 2})
 
-    # Post on each group
-    for group in groups_links_list:
-        driver.get(group)
+    driver = webdriver.Chrome(options=chrome_options)
+    
+    try:
+        # Login to Facebook
+        driver.get('https://www.facebook.com')
         time.sleep(2)
-        try:
-            driver.find_element(By.XPATH,'//*[@label="Start Discussion"]').click()
-            post_box=driver.find_element_by_css_selector("[name='xhpc_message_text']")
-        except:
-            post_box=driver.find_element_by_css_selector("[name='xhpc_message_text']")
-        post_box.send_keys(message)
-        time.sleep(1)
-        for photo in images_list:
-            photo_element = driver.find_element(By.XPATH,'//input[@type="file"]')
-            photo_element.send_keys(photo)
-            time.sleep(1)
-        time.sleep(6)
-        post_button = driver.find_element_by_xpath("//*[@data-testid='react-composer-post-button']")
-        clickable = False
-        while not clickable:
-            cursor = post_button.find_element_by_tag_name('span').value_of_css_property("cursor")
-            if cursor == "pointer":
-                clickable = True
-            break
-        post_button.click()
-        time.sleep(5)
-    # Close driver
-    driver.close()
 
-if __name__ == '__main__':
-  main()
+        driver.find_element(By.ID, "email").send_keys(account)
+        driver.find_element(By.ID, "pass").send_keys(password)
+        driver.find_element(By.NAME, "login").click()
+        time.sleep(5)
+
+        # Post on each group
+        for group in groups_links_list:
+            driver.get(group)
+            time.sleep(3)
+            
+            try:
+                post_box = driver.find_element(By.XPATH, "//div[@aria-label='Create a public post…']")
+                post_box.click()
+                time.sleep(2)
+                post_box.send_keys(message)
+                time.sleep(2)
+
+                # Click the post button
+                post_button = driver.find_element(By.XPATH, "//*[@aria-label='Post']")
+                post_button.click()
+                time.sleep(5)
+
+                print(f"✅ Successfully posted to {group}")
+
+            except Exception as e:
+                print(f"⚠️ Failed to post in {group}: {e}")
+
+    except Exception as e:
+        print(f"❌ Error: {e}")
+    
+    finally:
+        driver.quit()
+
+Apify.run(main)
