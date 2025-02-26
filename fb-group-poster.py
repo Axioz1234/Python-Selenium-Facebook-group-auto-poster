@@ -9,8 +9,12 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 
 async def main():
-    input_data = await Actor.get_input()  # Get the actor input
-
+    # Initialize the Actor environment
+    await Actor.init()
+    
+    # Now it's safe to get the actor input
+    input_data = await Actor.get_input()
+    
     # Get group URLs and split them into a list
     urls_str = input_data.get("Facebook_Profile_URL", "")
     groups_links_list = [url.strip() for url in urls_str.split(",") if url.strip()]
