@@ -6,8 +6,11 @@
     "Facebook_Profile_URL": {
       "title": "Facebook Group URL List (Comma-separated)",
       "type": "array",
-      "items": { "type": "string" },
-      "description": "List of Facebook group URLs."
+      "items": {
+        "type": "string"
+      },
+      "description": "List of Facebook group URLs.",
+      "editor": "stringList"
     },
     "Message": {
       "title": "Enter Your Message",
