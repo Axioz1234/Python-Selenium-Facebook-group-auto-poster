@@ -1,20 +1,33 @@
 {
-    "title": "Facebook Group Auto Poster",
-    "type": "object",
-    "schemaVersion": 1,
-    "properties": {
-      "groups_links_list": {
-        "title": "Facebook Groups",
-        "type": "array",
-        "items": { "type": "string" },
-        "description": "List of Facebook group URLs."
-      },
-      "message": {
-        "title": "Post Message",
-        "type": "string",
-        "description": "The text content of the post."
-      }
+  "title": "Facebook Group Auto Poster",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "Facebook_Profile_URL": {
+      "title": "Facebook Group URL List (Comma-separated)",
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of Facebook group URLs."
     },
-    "required": ["groups_links_list", "message"]
-  }
-  
+    "Message": {
+      "title": "Enter Your Message",
+      "type": "string",
+      "description": "The text content of the post."
+    },
+    "Delay": {
+      "title": "Delay (Seconds)",
+      "type": "integer",
+      "description": "Delay between posts (in seconds).",
+      "default": 15
+    },
+    "Cookies": {
+      "title": "Facebook Cookie (Optional)",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "domain": { "type": "string" },
+          "expirationDate": { "type": "number" },
+          "hostOnly": { "type": "boolean" },
+          "httpOnly": { "type": "boolean" },
+          "name": { "
