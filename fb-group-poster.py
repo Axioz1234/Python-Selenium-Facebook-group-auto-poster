@@ -3,7 +3,7 @@ import json
 import time
 import asyncio
 import traceback
-from apify import Actor  # Python Apify SDK import
+from apify import Actor  # Updated import
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -51,7 +51,7 @@ async def main():
     # Set the Chromium binary location (make sure it's installed in your Docker image)
     options.binary_location = "/usr/bin/chromium"
     
-    # Specify the ChromeDriver path explicitly (ensure it's installed)
+    # Specify the ChromeDriver path explicitly
     service = Service(executable_path="/usr/bin/chromedriver")
     try:
         driver = webdriver.Chrome(service=service, options=options)
@@ -72,6 +72,10 @@ async def main():
             time.sleep(5)
         elif cookies:
             for cookie in cookies:
+                # Check if sameSite attribute is valid; if not, remove it.
+                if "sameSite" in cookie and cookie["sameSite"] not in ["Strict", "Lax", "None"]:
+                    print(f"Cookie '{cookie.get('name')}' has invalid sameSite value '{cookie['sameSite']}', removing it.")
+                    del cookie["sameSite"]
                 driver.add_cookie(cookie)
             driver.refresh()
             time.sleep(3)
