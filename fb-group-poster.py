@@ -1,23 +1,23 @@
 import os
 import json
 import time
-import apify as Apify
+from apify import Actor  # Updated import
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 
 async def main():
-    input_data = await Apify.get_input()
+    input_data = await Actor.get_input()  # You might need to update get_input too, if applicable
 
-    # Process group URLs (comma-separated into list)
+    # Get group URLs and split them into a list
     urls_str = input_data.get("Facebook_Profile_URL", "")
     groups_links_list = [url.strip() for url in urls_str.split(",") if url.strip()]
     
     message = input_data.get("Message", "")
     delay = input_data.get("Delay", 15)
     
-    # Get cookies as JSON string and try to parse them
+    # Parse Cookies JSON if provided
     cookies_input = input_data.get("Cookies", "")
     cookies = []
     if cookies_input:
@@ -45,13 +45,13 @@ async def main():
         driver.get('https://www.facebook.com')
         time.sleep(2)
         
-        # If credentials are provided, perform login via form
+        # Use credentials if provided
         if username and password:
             driver.find_element(By.ID, "email").send_keys(username)
             driver.find_element(By.ID, "pass").send_keys(password)
             driver.find_element(By.NAME, "login").click()
             time.sleep(5)
-        # Otherwise, if cookies are provided, add them
+        # Otherwise, if cookies provided, add them
         elif cookies:
             for cookie in cookies:
                 driver.add_cookie(cookie)
@@ -61,7 +61,6 @@ async def main():
             print("❌ Error: No authentication method provided (either cookies or username/password).")
             return
         
-        # Loop through each group and post the message
         for group in groups_links_list:
             driver.get(group)
             time.sleep(3)
@@ -84,4 +83,5 @@ async def main():
     finally:
         driver.quit()
 
-Apify.run(main)
+# Run the actor using the Actor class
+Actor.run(main)
