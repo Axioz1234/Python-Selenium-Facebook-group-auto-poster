@@ -8,7 +8,7 @@
       "type": "string",
       "description": "List of Facebook group URLs separated by commas.",
       "editor": "textarea",
-      "default": "https://www.facebook.com/groups/825095794282007/\nhttps://www.facebook.com/groups/1478593245698376/"
+      "default": "https://www.facebook.com/groups/825095794282007/, https://www.facebook.com/groups/1478593245698376/"
     },
     "Message": {
       "title": "Enter Your Message",
