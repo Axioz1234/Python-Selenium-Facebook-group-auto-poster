@@ -24,7 +24,8 @@
     "Cookies": {
       "title": "Facebook Cookie (Optional)",
       "type": "string",
-      "description": "Paste your Facebook session cookies here as a JSON array."
+      "description": "Paste your Facebook session cookies here as a JSON array.",
+      "editor": "json"
     }
   },
   "required": ["Facebook_Profile_URL", "Message"]
