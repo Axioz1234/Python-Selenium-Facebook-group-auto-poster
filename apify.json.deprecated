@@ -1,9 +1,0 @@
-{
-  "name": "facebook-group-auto-poster",
-  "version": "0.1",
-  "actorSpecificationVersion": "1.0",
-  "main": "fb-group-poster.py",
-  "env": {
-    "APIFY_PYTHON_VERSION": "3.9"
-  }
-}

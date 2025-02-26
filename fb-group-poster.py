@@ -11,9 +11,30 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.chrome.service import Service
 
-# Import for explicit waits
+# Imports for explicit waits
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+
+def robust_click(driver, by, locator, timeout=20):
+    """
+    Attempts to click an element robustly by waiting until it's clickable,
+    scrolling it into view, and falling back to a JavaScript click if needed.
+    """
+    try:
+        element = WebDriverWait(driver, timeout).until(
+            EC.element_to_be_clickable((by, locator))
+        )
+        driver.execute_script("arguments[0].scrollIntoView(true);", element)
+        time.sleep(0.5)  # Allow some time for scrolling animation
+        try:
+            element.click()
+        except Exception:
+            # Fallback: click via JavaScript if normal click fails
+            driver.execute_script("arguments[0].click();", element)
+        return True
+    except Exception as e:
+        print(f"Could not click element located by {by}='{locator}':", e)
+        return False
 
 async def main():
     # Initialize the Actor environment
@@ -21,8 +42,7 @@ async def main():
     
     # Get the actor input
     input_data = await Actor.get_input()
-    # Expecting a JSON input with keys:
-    # "Facebook_Profile_URL", "Message", "Delay", "Cookies", "Username", "Password"
+    # Expecting a JSON input with keys: "Facebook_Profile_URL", "Message", "Delay", "Cookies", "Username", "Password"
     urls_str = input_data.get("Facebook_Profile_URL", "")
     groups_links_list = [url.strip() for url in urls_str.split(",") if url.strip()]
     message = input_data.get("Message", "")
@@ -67,7 +87,7 @@ async def main():
         driver.get("https://www.facebook.com")
         time.sleep(2)
         
-        # Log in via credentials if provided; otherwise, add cookies.
+        # Log in via credentials if provided; otherwise, use cookies.
         if username and password:
             driver.find_element(By.ID, "email").send_keys(username)
             driver.find_element(By.ID, "pass").send_keys(password)
@@ -76,14 +96,10 @@ async def main():
         elif cookies:
             for cookie in cookies:
                 if "sameSite" in cookie:
-                    # Accept both correct and lower-case variants
                     if cookie["sameSite"] == "lax":
                         cookie["sameSite"] = "Lax"
                     elif cookie["sameSite"] == "no_restriction":
                         cookie["sameSite"] = "None"
-                    elif cookie["sameSite"] not in ["Strict", "Lax", "None"]:
-                        print(f"Cookie '{cookie.get('name')}' has invalid sameSite value '{cookie['sameSite']}', removing it.")
-                        del cookie["sameSite"]
                 driver.add_cookie(cookie)
             driver.refresh()
             time.sleep(3)
@@ -97,25 +113,22 @@ async def main():
             driver.get(group_url)
             time.sleep(3)
             
-            # Step 1: Click "Write something..." button
-            # Using your provided absolute XPath:
-            write_xpath = "//*[@id='mount_0_0_gi']/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div/div[2]/div/div/div[4]/div/div/div[2]/div/div/div[2]/div[1]/div/div/div/div[1]/div"
-            try:
-                write_something = wait.until(EC.element_to_be_clickable((By.XPATH, write_xpath)))
-                driver.execute_script("arguments[0].scrollIntoView(true);", write_something)
-                time.sleep(1)
-                write_something.click()
+            # Attempt to click the "Write something..." button using robust_click
+            write_xpath = ("//*[@id='mount_0_0_gi']/div/div[1]/div/div[3]/div/div/div[1]/div[1]/div/"
+                           "div[2]/div/div/div[4]/div/div/div[2]/div/div/div[2]/div[1]/div/div/div/"
+                           "div[1]/div")
+            if robust_click(driver, By.XPATH, write_xpath, timeout=20):
                 print(f"✅ Clicked 'Write something...' on {group_url}")
                 time.sleep(2)
-            except Exception as e:
-                print(f"⚠️ Could not click 'Write something...' on {group_url}: {e}")
-                traceback.print_exc()
+            else:
+                print(f"⚠️ Failed to click 'Write something...' on {group_url}")
                 continue
             
-            # (For now, we stop here; later steps: type text, click Post, etc.)
+            # Here you could add further steps, e.g., typing the message and clicking 'Post'
+            # For now, we stop after clicking the button.
             
     except Exception as e:
-        print(f"❌ Error during processing: {e}")
+        print("❌ Error during processing:", e)
         traceback.print_exc()
     finally:
         driver.quit()
