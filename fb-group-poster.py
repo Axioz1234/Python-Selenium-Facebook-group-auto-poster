@@ -2,7 +2,8 @@ import os
 import json
 import time
 import asyncio
-from apify import Actor  # Updated import
+import traceback
+from apify import Actor  # Python Apify SDK import
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -13,7 +14,7 @@ async def main():
     # Initialize the Actor environment
     await Actor.init()
     
-    # Get the actor input
+    # Now it's safe to get the actor input
     input_data = await Actor.get_input()
     
     # Get group URLs and split them into a list
@@ -31,6 +32,7 @@ async def main():
             cookies = json.loads(cookies_input)
         except Exception as e:
             print("Error parsing Cookies JSON:", e)
+            traceback.print_exc()
     
     # Get optional credentials
     username = input_data.get("Username", "")
@@ -46,13 +48,18 @@ async def main():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-gpu")
     options.add_argument("--disable-dev-shm-usage")
-    # Set the Chromium binary location
+    # Set the Chromium binary location (make sure it's installed in your Docker image)
     options.binary_location = "/usr/bin/chromium"
     
-    # Specify the ChromeDriver path explicitly
+    # Specify the ChromeDriver path explicitly (ensure it's installed)
     service = Service(executable_path="/usr/bin/chromedriver")
-    driver = webdriver.Chrome(service=service, options=options)
-    
+    try:
+        driver = webdriver.Chrome(service=service, options=options)
+    except Exception as e:
+        print("❌ Error starting Chrome WebDriver:", e)
+        traceback.print_exc()
+        return
+
     try:
         driver.get('https://www.facebook.com')
         time.sleep(2)
@@ -89,8 +96,10 @@ async def main():
                 print(f"✅ Successfully posted to {group}")
             except Exception as e:
                 print(f"⚠️ Failed to post in {group}: {e}")
+                traceback.print_exc()
     except Exception as e:
-        print(f"❌ Error: {e}")
+        print(f"❌ Error during processing: {e}")
+        traceback.print_exc()
     finally:
         driver.quit()
 
