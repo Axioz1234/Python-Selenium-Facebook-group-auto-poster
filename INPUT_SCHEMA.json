@@ -7,13 +7,15 @@
       "title": "Facebook Group URL List (Comma-separated)",
       "type": "string",
       "description": "List of Facebook group URLs separated by commas.",
-      "editor": "textarea"
+      "editor": "textarea",
+      "prefill": "https://www.facebook.com/groups/825095794282007/\nhttps://www.facebook.com/groups/1478593245698376/"
     },
     "Message": {
       "title": "Enter Your Message",
       "type": "string",
       "description": "The text content of the post.",
-      "editor": "textarea"
+      "editor": "textarea",
+      "prefill": "Your message here"
     },
     "Delay": {
       "title": "Delay (Seconds)",
@@ -22,10 +24,26 @@
       "default": 15
     },
     "Cookies": {
-      "title": "Facebook Cookie (Optional)",
+      "title": "Facebook Cookies (Optional)",
       "type": "string",
-      "description": "Paste your Facebook session cookies here as a JSON array.",
-      "editor": "textarea"
+      "description": "Paste your Facebook session cookies here as a JSON array. This will be used for authentication if provided.",
+      "editor": "textarea",
+      "prefill": ""
+    },
+    "Username": {
+      "title": "Facebook Username (Optional)",
+      "type": "string",
+      "description": "Your Facebook account username or email. Used if cookies are not provided.",
+      "editor": "textfield",
+      "prefill": ""
+    },
+    "Password": {
+      "title": "Facebook Password (Optional)",
+      "type": "string",
+      "description": "Your Facebook account password. Used if cookies are not provided.",
+      "editor": "textfield",
+      "prefill": "",
+      "isSecret": true
     }
   },
   "required": ["Facebook_Profile_URL", "Message"]
