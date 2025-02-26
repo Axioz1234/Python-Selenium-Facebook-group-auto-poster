@@ -39,11 +39,15 @@ async def main():
         print("❌ Error: Missing required input fields (Facebook group URLs or message).")
         return
 
+    # Configure Selenium Chrome options
     options = Options()
     options.add_argument("--headless")
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-gpu")
     options.add_argument("--disable-dev-shm-usage")
+    # Set the binary location for Chromium (make sure it's installed in your Docker image)
+    options.binary_location = "/usr/bin/chromium"
+    
     driver = webdriver.Chrome(options=options)
     
     try:
