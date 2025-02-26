@@ -24,6 +24,7 @@
     "Cookies": {
       "title": "Facebook Cookie (Optional)",
       "type": "array",
+      "editor": "json",
       "items": {
         "type": "object",
         "properties": {
