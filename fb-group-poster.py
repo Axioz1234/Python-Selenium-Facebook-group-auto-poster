@@ -26,7 +26,7 @@ async def main():
     message = input_data.get("Message", "")
     delay = input_data.get("Delay", 15)
     
-    # Parse Cookies JSON if provided
+    # Parse cookies if provided
     cookies_input = input_data.get("Cookies", "")
     cookies = []
     if cookies_input:
@@ -36,7 +36,7 @@ async def main():
             print("Error parsing Cookies JSON:", e)
             traceback.print_exc()
     
-    # Get optional credentials
+    # Optional credentials
     username = input_data.get("Username", "")
     password = input_data.get("Password", "")
     
@@ -50,8 +50,11 @@ async def main():
     options.add_argument("--no-sandbox")
     options.add_argument("--disable-gpu")
     options.add_argument("--disable-dev-shm-usage")
-    options.binary_location = "/usr/bin/chromium"  # Make sure Chromium is installed in your Docker image
-    service = Service(executable_path="/usr/bin/chromedriver")  # Ensure ChromeDriver is installed
+    options.add_argument("--window-size=1920,1080")  # Large screen size
+
+    # Path to Chromium & ChromeDriver in Docker
+    options.binary_location = "/usr/bin/chromium"
+    service = Service(executable_path="/usr/bin/chromedriver")
     
     try:
         driver = webdriver.Chrome(service=service, options=options)
@@ -64,7 +67,7 @@ async def main():
         driver.get("https://www.facebook.com")
         time.sleep(2)
         
-        # Login via credentials or cookies
+        # Log in via credentials or cookies
         if username and password:
             driver.find_element(By.ID, "email").send_keys(username)
             driver.find_element(By.ID, "pass").send_keys(password)
@@ -82,28 +85,20 @@ async def main():
             print("❌ Error: No authentication method provided (either cookies or username/password).")
             return
 
-        wait = WebDriverWait(driver, 15)
-        
+        # Explicit wait
+        wait = WebDriverWait(driver, 20)
+
         for group_url in groups_links_list:
             driver.get(group_url)
             time.sleep(3)
-            
-            # 1) Click the Discussion tab using a locator that finds a tab containing the word "Discussion"
-            try:
-                discussion_tab = wait.until(
-                    EC.element_to_be_clickable((By.XPATH, "//a[@role='tab' and contains(., 'Discussion')]"))
-                )
-                discussion_tab.click()
-                time.sleep(2)
-            except Exception as e:
-                print(f"⚠️ Could not click Discussion tab on {group_url}: {e}")
-                traceback.print_exc()
-                continue
 
-            # 2) Click "Write something..." button
+            # 1) Click "Write something..." button
             try:
+                # Adjust the locator to match your "Write something..." element
                 write_something = wait.until(
-                    EC.element_to_be_clickable((By.XPATH, "//div[@role='button' and contains(., 'Write something')]"))
+                    EC.element_to_be_clickable(
+                        (By.XPATH, "//div[@role='button' and contains(., 'Write something')]")
+                    )
                 )
                 write_something.click()
                 time.sleep(2)
@@ -112,20 +107,21 @@ async def main():
                 traceback.print_exc()
                 continue
 
-            # 3) Type text into the popup field (using aria-label; adjust if needed)
+            # 2) Type text in the popup field
             try:
-                popup_field = wait.until(
+                # If your text area has aria-label="Create a public post…", adjust accordingly
+                text_area = wait.until(
                     EC.presence_of_element_located((By.XPATH, "//div[@aria-label='Create a public post…']"))
                 )
-                popup_field.click()
-                popup_field.send_keys(message)
+                text_area.click()
+                text_area.send_keys(message)
                 time.sleep(1)
             except Exception as e:
                 print(f"⚠️ Could not type into the popup field on {group_url}: {e}")
                 traceback.print_exc()
                 continue
 
-            # 4) Click the Post button
+            # 3) Click the Post button
             try:
                 post_button = wait.until(
                     EC.element_to_be_clickable((By.XPATH, "//div[@aria-label='Post']"))
