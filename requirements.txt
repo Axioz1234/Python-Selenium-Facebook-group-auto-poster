@@ -1,0 +1,3 @@
+selenium
+apify
+Twisted<23.0.0
