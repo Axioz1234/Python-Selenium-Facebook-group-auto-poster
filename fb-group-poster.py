@@ -84,4 +84,4 @@ async def main():
         driver.quit()
 
 # Run the actor using the Actor class
-Actor.run(main)
+Actor.main(main)
