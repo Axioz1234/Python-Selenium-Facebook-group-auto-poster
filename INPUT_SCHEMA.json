@@ -12,7 +12,8 @@
     "Message": {
       "title": "Enter Your Message",
       "type": "string",
-      "description": "The text content of the post."
+      "description": "The text content of the post.",
+      "editor": "textarea"
     },
     "Delay": {
       "title": "Delay (Seconds)",

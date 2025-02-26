@@ -12,7 +12,8 @@ async def main():
     input_data = await Apify.get_input()
 
     # Get required inputs
-    groups_links_list = input_data.get("Facebook_Profile_URL", [])
+    groups_links_list = input_data.get("Facebook_Profile_URL", "").split(",")
+    groups_links_list = [url.strip() for url in groups_links_list if url.strip()]
     message = input_data.get("Message", "")
     delay = input_data.get("Delay", 15)  # Default delay is 15 seconds
     cookies = input_data.get("Cookies", [])
