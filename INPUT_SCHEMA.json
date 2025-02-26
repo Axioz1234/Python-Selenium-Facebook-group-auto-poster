@@ -23,25 +23,8 @@
     },
     "Cookies": {
       "title": "Facebook Cookie (Optional)",
-      "type": "array",
-      "editor": "json",
-      "items": {
-        "type": "object",
-        "properties": {
-          "domain": { "type": "string" },
-          "expirationDate": { "type": "number" },
-          "hostOnly": { "type": "boolean" },
-          "httpOnly": { "type": "boolean" },
-          "name": { "type": "string" },
-          "path": { "type": "string" },
-          "sameSite": { "type": "string" },
-          "secure": { "type": "boolean" },
-          "session": { "type": "boolean" },
-          "storeId": { "type": ["string", "null"] },
-          "value": { "type": "string" }
-        }
-      },
-      "description": "Paste your Facebook session cookies here (if needed)."
+      "type": "string",
+      "description": "Paste your Facebook session cookies here as a JSON array."
     }
   },
   "required": ["Facebook_Profile_URL", "Message"]
